@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCIENCE TERM 4</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #0f0f0f;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            height: 90vh;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>SCIENCE TERM 4 Simulation</h1>
+
+    <div class="container">
+        <iframe src="./SCIENCE%20TERM%204.html"></iframe>
+    </div>
+
+</body>
+</html>
