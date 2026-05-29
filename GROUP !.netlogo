@@ -1,0 +1,254 @@
+; =====================================================
+; SELECTIVE BREEDING SIMULATION
+; =====================================================
+; Blue   = 0 - 25
+; Green  = 26 - 50
+; Orange = 51 - 75
+; Red    = 76 - 100
+;
+; Orange and Red organisms are selected
+; to reproduce more often.
+; =====================================================
+
+turtles-own [
+  dtv
+]
+
+; =====================================================
+; SETUP
+; =====================================================
+
+to setup
+  clear-all
+
+  ; -------------------------
+  ; CREATE BLUE ORGANISMS
+  ; -------------------------
+  create-turtles 2 [
+    set dtv random 26
+    setup-organism
+  ]
+
+  ; -------------------------
+  ; CREATE GREEN ORGANISMS
+  ; -------------------------
+  create-turtles 2 [
+    set dtv 26 + random 25
+    setup-organism
+  ]
+
+  ; -------------------------
+  ; CREATE ORANGE ORGANISMS
+  ; -------------------------
+  create-turtles 2 [
+    set dtv 51 + random 25
+    setup-organism
+  ]
+
+  ; -------------------------
+  ; CREATE RED ORGANISMS
+  ; -------------------------
+  create-turtles 2 [
+    set dtv 76 + random 25
+    setup-organism
+  ]
+
+  reset-ticks
+end
+
+; =====================================================
+; ORGANISM APPEARANCE
+; =====================================================
+
+to setup-organism
+
+  ; random position
+  setxy random-xcor random-ycor
+
+  ; appearance
+  set size 1.5
+  set shape "circle"
+
+  ; assign color
+  update-color
+end
+
+; =====================================================
+; MAIN LOOP
+; =====================================================
+
+to go
+
+  reproduce-selected
+
+  ; FORCE STOP immediately if population reaches 1000
+  if count turtles >= 1000 [
+    stop
+  ]
+
+  ; update colors
+  ask turtles [
+    update-color
+  ]
+
+  ; update graph
+  update-color-plot
+
+  ; slow simulation
+  wait 0.2
+
+  ; next generation
+  tick
+
+  ; other stop conditions
+  check-stop
+
+end
+; =====================================================
+; SELECTIVE BREEDING
+; =====================================================
+to reproduce-selected
+
+  ; breeder selects orange + red
+  let breeders turtles with [dtv > 50]
+
+  ask breeders [
+
+    ; reproduction chance
+    if random 100 < reproduction-rate [
+
+      hatch 1 [
+
+        ; inherit parent's trait
+        set dtv [dtv] of myself
+
+        ; ------------------------------------
+        ; GRADUAL SELECTIVE BREEDING
+        ; ------------------------------------
+
+        ; orange organisms improve slowly
+        if dtv <= 75 [
+          set dtv dtv + random-float 1.2
+        ]
+
+        ; red organisms improve faster
+        if dtv > 75 [
+          set dtv dtv + random-float 2
+        ]
+
+        ; mutation chance
+        if random 100 < mutation-rate [
+
+          ; small mutation variation
+          set dtv dtv +
+          ((random-float mutation-strength)
+          - (mutation-strength / 2))
+        ]
+
+        ; keep within range
+        if dtv > 100 [
+          set dtv 100
+        ]
+
+        if dtv < 0 [
+          set dtv 0
+        ]
+
+        ; ------------------------------------
+        ; STRONG SCATTERING
+        ; ------------------------------------
+        setxy random-xcor random-ycor
+
+        set heading random 360
+        fd random-float 15
+
+        ; update offspring color
+        update-color
+      ]
+    ]
+  ]
+end
+
+; =====================================================
+; COLOR CATEGORIES
+; =====================================================
+
+to update-color
+
+  ; BLUE
+  if dtv <= 25 [
+    set color blue
+  ]
+
+  ; GREEN
+  if dtv > 25 and dtv <= 50 [
+    set color green
+  ]
+
+  ; ORANGE
+  if dtv > 50 and dtv <= 75 [
+    set color orange
+  ]
+
+  ; RED
+  if dtv > 75 [
+    set color red
+  ]
+
+end
+
+; =====================================================
+; COLOR POPULATION PLOT
+; =====================================================
+
+to update-color-plot
+
+  set-current-plot "Color Population Over Time"
+
+  ; -------------------------
+  ; BLUE PEN
+  ; -------------------------
+  set-current-plot-pen "Blue"
+  plot count turtles with [dtv <= 25]
+
+  ; -------------------------
+  ; GREEN PEN
+  ; -------------------------
+  set-current-plot-pen "Green"
+  plot count turtles with [
+    dtv > 25 and dtv <= 50
+  ]
+
+  ; -------------------------
+  ; ORANGE PEN
+  ; -------------------------
+  set-current-plot-pen "Orange"
+  plot count turtles with [
+    dtv > 50 and dtv <= 75
+  ]
+
+  ; -------------------------
+  ; RED PEN
+  ; -------------------------
+  set-current-plot-pen "Red"
+  plot count turtles with [dtv > 75]
+
+end
+
+; =====================================================
+; STOP CONDITIONS
+; =====================================================
+
+to check-stop
+
+  ; stop if average trait exceeds 95
+  if mean [dtv] of turtles > 95 [
+    stop
+  ]
+
+  ; stop if all organisms become red
+  if all? turtles [dtv > 75] [
+    stop
+  ]
+
+end
